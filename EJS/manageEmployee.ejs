@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en"> 
+
+    <head>
+        <title> Send Request</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Welcome to the IndoTechLogin webPage">
+        <link rel="stylesheet" href="./css/main.css">
+        <link rel = 'icon' href="./images/logo.jpeg">
+
+    </head>
+
+    <body>
+        <!--Import the header ejs file-->
+        <%- include('header') %>
+
+        <div class="admin-dashboard">
+            <nav>
+                <ul>
+                    <li><a href="/admin">Dashboard</a></li>
+                    <li><a href="/manageEmployee ">Manage Employee</a></li>
+                    <li><a href="/manageDashboard">Manage Dashboard</a></li>
+                    <li><a href="/Review">Review Tasks</a></li>
+                </ul>
+            </nav>
+        </div>
+
+        <!--Display logged user-->
+        <div class="logout-button">
+            <h2>Welcome back <%= username %> </h2>
+            <a href="/logout"><button type="button">Logout</button></a>
+        </div>
+
+        <!--Request Submission-->
+        <div class="admin-section-box"> <!--Admin box -->
+
+                <div class="admin-section-list">
+                        
+                    <div class="header-timer">
+                        <h1>MANAGE EMPLOYEE</h1>
+                        <p id="current-time"></p>
+                    </div>
+                    <div class="add-employee-form">
+                        <h2>Add New Employee</h2>
+                        <form action="/addEmployee" method="post">
+                            <label for="username">Username:</label>
+                            <input type="text" name="username" id="username" required>
+                    
+                            <label for="email">Email:</label>
+                            <input type="email" name="email" id="email" required>
+                    
+                            <label for="id">Employee ID:</label>
+                            <input type="text" name="id" id="id" required>
+                    
+                            <label for="password">Password:</label>
+                            <input type="password" name="password" id="password" required>
+                    
+                            <button type="submit">Add Employee</button>
+                        </form>
+                    </div>
+                   
+
+                    <ul>
+                        <% employees.forEach(function(employee) { %>
+                            <li>
+                                <span><%= employee.username %> (ID: <%= employee.id %>)</span>
+                                <form action="/deleteEmployee" method="post" style="display:inline;">
+                                    <input type="hidden" name="employeeId" value="<%= employee._id %>">
+                                    <button type="submit" class="delete-btn">Delete</button>
+                                </form>
+                            </li>
+                        <% }); %>
+                    </ul>
+                        
+                </div>
+        
+                
+                
+
+            
+        </div>  <!--End of Admin box -->
+
+        
+
+
+     
+    <footer>
+
+        <p><strong>&copy INDOTECH, 2004-2024. All rights reserved.</strong></p>
+
+    </footer>
+
+
+    <script src="./js/index.js"></script>
+    <script src="./js/timer.js"></script>
+    <script src="./js/categoryPartHandler.js"></script>
+    <script src="./js/getOnlineEmployee.js"></script>
+    <script src="./js/requestForm.js"></script>
+    <script src="./js/stockPartHandler.js"></script>
+    
+
+
+    
+    </body>
+
+
+
+</html>

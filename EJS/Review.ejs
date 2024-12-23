@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title> Admin-Review Section</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Welcome to the IndoTechLogin admin webPage">
+        <link rel="stylesheet" href="./css/main.css">
+        <link rel = 'icon' href="./images/logo.jpeg">
+    </head>
+
+
+    <body>
+         <!--Import the header ejs file-->
+         <%- include('header') %>
+
+        <div class="admin-dashboard">
+            <nav>
+                <ul>
+                    <li>
+                       <a href="/admin"> Dashboard </a>   
+                    </li>
+                    <li>
+                        <a href="/manageEmployee">Manage Employee</a>
+                    </li>
+                    <li>
+                        <a href="/manageDashboard">Manage Dashboard</a>
+                    </li>
+
+                    <li>
+                        <a href="/Review">Review Tasks</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+        <div class="logout-button">
+            <h2>Welcome back <%= username %> </h2>
+            <a href="/logout"><button type="button">Logout</button></a>
+        </div>
+
+        <div class="admin-section-box">
+            <div class="admin-section-list">
+                <div class="header-timer">
+                    <h1>REVIEW TASKS</h1>
+                    <p id="current-time"></p>
+                </div>
+        
+                <!-- Placeholder for completed tasks -->
+                <div class="completed-tasks-section">
+                    <h2>Completed Tasks</h2>
+                    <div id="completed-tasks-container">
+                        <!-- Completed tasks will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+
+        <script src="./js/timer.js"></script>
+        <script src="./js/review.js"></script>
+
+        <footer>
+            <p><strong>&copy INDOTECH, 2004-2024. All rights reserved.</strong></p>
+        </footer>
+
+    </body>
+
+</html>

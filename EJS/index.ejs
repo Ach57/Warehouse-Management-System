@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <head>
+        <title> Login and Register</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Welcome to the IndoTechLogin webPage">
+        <link rel="stylesheet" href="/css/main.css">
+        <link rel = 'icon' href="/images/logo.jpeg">
+    </head>
+
+    <body data-is-logged-in="<%= isLoggedIn %>">
+
+        <!--Import the header ejs file-->
+        <%- include('header') %>
+        <main class="auth-content">
+            <div class="auth-container">
+                <!-- Tabs for switching between login and register -->
+                <div class="auth-tabs">
+                    <button id="login-tab" class="auth-tab active" onclick="showForm('login')">Login</button>
+                    <button id="register-tab" class="auth-tab" onclick="showForm('register')">Register</button>
+                </div>
+    
+                <!-- Login Form -->
+                <div id="login-form" class="auth-form">
+                    <form action="/login" method="post">
+                        <legend>Login Form</legend><br>
+                        <label><strong>Username:</strong></label>
+                        <input id="login-username" type="text" name="username" placeholder="Enter your username" required><br><br>
+                        <label><strong>Password:</strong></label>
+                        <input id="login-password" type="password" name="password" placeholder="Enter your password" required>
+                        <div id="login-message">    
+                            <% if (loginMessage) { %>
+                                <p><%= loginMessage %></p>
+                            <% } %>
+                        </div>
+
+                        <button type="submit">Login</button>
+                    </form>
+                </div>
+    
+                <!-- Register Form -->
+                <div id="register-form" class="auth-form" style="display:none;">
+                    <form action="/register" method="post">
+                        <legend>Register Form</legend><br>
+                        <label><strong>Username:</strong></label>
+                        <input id="register-username" type="text" name="username" placeholder="Choose a username" required><br><br>
+                        <label><strong>Email:</strong></label>
+                        <input id="register-email" type="email" name="email" placeholder="Enter your email" required><br><br>
+                        <label><strong>ID:</strong></label>
+                        <input id="user-id" type="text" name="id" placeholder="Enter your ID" required><br><br>
+                        <label><strong>Password:</strong></label>
+                        <input id="register-password" type="password" name="password" placeholder="Choose a password" required>
+                         <!-- Display the message -->
+                        <div id="register-message">    
+                        <% if (registerMessage) { %>
+                            <p><%= registerMessage %></p>
+                        <% } %>
+                    </div>
+                        <button type="submit">Register</button>
+                    </form>
+                </div>
+    
+            </div>
+        </main>        
+        <footer>
+
+            <p><strong>&copy INDOTECH, 2004-2024. All rights reserved.</strong></p>
+
+        </footer>
+
+
+        <script src="/js/index.js"></script>
+        
+    </body>
+
+
+
+</html>

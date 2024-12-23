@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title> Admin Section</title>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta name="description" content="Welcome to the IndoTechLogin admin webPage">
+        <link rel="stylesheet" href="./css/main.css"> 
+        <link rel = 'icon' href="./images/logo.jpeg">
+        <script src="/socket.io/socket.io.js"></script>
+    </head>
+
+    <body data-is-logged-in="<%= isLoggedIn %>">  
+        <!--Import the header ejs file-->
+        <%- include('header') %>
+
+            <div class="admin-dashboard">
+            <nav>
+                <ul>
+                    <li>
+                       <a href="/admin"> Dashboard </a>   
+                    </li>
+                    <li>
+                        <a href="/manageEmployee">Manage Employee</a>
+                    </li>
+                    <li>
+                        <a href="/manageDashboard">Manage Dashboard</a>
+                    </li>
+
+                    <li>
+                        <a href="/Review">Review Tasks</a>
+                    </li>
+
+                    <li>
+                        <a href="/AddAdmin">Add new Admin</a>
+
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <div class="logout-button">
+            <h2>Welcome back <%= username %> </h2>
+            <a href="/logout"><button type="button">Logout</button></a>
+        </div>
+
+
+        <div class="admin-section-box">
+            <div class="admin-section-list">
+                <div class="header-timer">
+                <h1>Admin Dashboard</h1>
+                <p id="current-time"></p>
+                </div>
+            </div>
+        
+            <!-- Tasks Container -->
+            <div id="tasks-container" class="tasks-container">
+                <!-- Tasks will be injected here by JavaScript -->
+            </div>
+              
+
+
+        </div>
+
+        
+
+        <!-- Add Admin Modal-->
+    <div id="newAdminModal" class="popup-modal">
+        <div class="popup-content">
+            <span class="popup-close">&times;</span>
+            <h2>Add New Administrator</h2>
+            <form id="newAdminForm" action="/addadmin" method="post">
+                <label for="admin-name"><strong>Username:</strong></label>
+                <input id="admin-name" type="text" name="newAdmin" placeholder="Enter new admin username" required><br><br>
+                <button type="submit">Confirm</button>
+            </form>
+            <% if (message) { %>
+                <p class="message-alert"><%= message %></p>
+            <% } %>
+        </div>
+    </div>
+ 
+        <footer>
+
+            <p><strong>&copy INDOTECH, 2004-2024. All rights reserved.</strong></p>
+
+        </footer>
+
+
+        <script src="/js/script.js"></script>
+        <script src="/js/timer.js"></script>
+        <script src="/js/handleModle.js"></script>
+        <script src="/js/displayTasks.js"></script>
+
+    </body>
+
+
+
+</html>
