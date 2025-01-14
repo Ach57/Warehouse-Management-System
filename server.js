@@ -10,7 +10,7 @@ const User = require('./public/js/user');
 const Task = require('./public/js/taskSchema')
 const CompletedTask = require('./public/js/completedTask')
 const SeperateOrder = require('./public/js/seperate');
-
+const Maintenance = require('./public/js/maintenance');
 
 const { default: mongoose } = require('mongoose');
 const {updateUserRole} = require('./public/js/updateRole');
@@ -505,6 +505,27 @@ app.post('/seperateOrder/start', async(req, res)=>{
     }
 });
 
+app.post('/maintenance/start', async (req, res)=>{
+    try{
+
+        const {title, components} = req.body;
+        if(!title || !components || components.length ===0){
+            return res.status(400).json({error: "Invalid data received"});
+
+        }
+
+        const newOrder = new Maintenance({title, components});
+        await newOrder.save();
+        res.status(201).json({ message: 'Order started and logged', order: newOrder });
+
+    } catch(err){
+        console.log('Error logging order: ', err);
+        res.status(500).json({error: 'Internal server error'});
+    }
+
+});
+
+
 app.patch('/seperateOrder/end/:id', async (req, res) => {
     try {
         const { id } = req.params;
@@ -532,12 +553,37 @@ app.patch('/seperateOrder/end/:id', async (req, res) => {
     }
 });
 
+app.patch('/maintenance/end/:id', async (req, res)=>{
+
+    try{
+        const {id} = req.params;
+        const {components} = req.body;
+
+        if (!components || !components.endTime || !components.comment){
+            return res.status(400).json({ error: 'Invalid data received' });
+        }
+
+        const updatedOrder = await Maintenance.findByIdAndUpdate(
+            id,
+            { $set: { 'components.$[elem].endTime': components.endTime, 'components.$[elem].comment': components.comment } },
+            { new: true, arrayFilters: [{ 'elem.startTime': { $ne: null } }] }
+        );
 
 
-app.post('maintenance', (req, res)=>{
+        if(!updatedOrder){
+            return res.status(404).json({ error: 'Order not found' });
+        }
+        res.status(200).json({ message: 'Order updated successfully', order: updatedOrder });
+    }catch(err){
+        console.error('Error updating order:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+
+})
 
 
-});
+
+
 
 
 
