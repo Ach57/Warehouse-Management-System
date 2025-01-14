@@ -113,6 +113,48 @@ async function finishTask(taskId, component, timeSpentElem) {
 };
 
 let orderId = null;
+let maintOrderId = null;
+
+document.getElementById('startMaintenance').addEventListener('click', async function(){
+    const startTime = new Date();
+    const title = prompt('Enter the title for the maintenance');
+    const employeeName = prompt('Enter your employee names seperated by comma').split(',');
+
+    const componets = {
+        startTime: startTime,
+        endTime : null,
+        employees: employeeName,
+        comment: null,
+    }
+
+    const data = {
+        title: title,
+        components: [componets],
+    }
+
+    // Send the data to log it in the database
+    const response = await fetch('/maintenance/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+        const result = await response.json();
+        maintOrderId = result.order._id;  // Store the order ID for future updates
+        console.log('Order logged:', result);
+        // Toggle the buttons
+        document.getElementById('startMaintenance').hidden = true;
+        document.getElementById('endMaintenance').hidden = false;
+    } else {
+        alert('Error logging the order.');
+    }
+
+});
+
+
 
 document.getElementById('startSeperate').addEventListener('click', async function (){
     const startTime = new Date(); // set starting time usind date
@@ -130,7 +172,7 @@ document.getElementById('startSeperate').addEventListener('click', async functio
 
     const data = {
         title: title,
-            components: [components],
+        components: [components],
 
     };
 
@@ -156,6 +198,39 @@ document.getElementById('startSeperate').addEventListener('click', async functio
 
 
 });
+
+document.getElementById('endMaintenance').addEventListener('click', async function(){
+    const comment = prompt('Enter a comment');
+    const endTime =  new Date();
+
+    const updatedData = {
+        components: {
+            endTime: endTime,
+            comment: comment,
+        },
+    };
+
+    // Send the data to update the order in the database
+    const response = await fetch(`/maintenance/end/${maintOrderId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+    });
+
+    if (response.ok) {
+        alert('Order updated successfully!');
+        // Reset the form and UI
+        document.getElementById('startMaintenance').hidden = false;
+        document.getElementById('endMaintenance').hidden = true;
+    } else {
+        alert('Error updating the order.');
+    }
+
+
+});
+
 
 document.getElementById('endSeperate').addEventListener('click', async function () {
     const comment = prompt('Enter a comment');
