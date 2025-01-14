@@ -112,4 +112,81 @@ async function finishTask(taskId, component, timeSpentElem) {
     }
 };
 
+let orderId = null;
+
+document.getElementById('startSeperate').addEventListener('click', async function (){
+    const startTime = new Date(); // set starting time usind date
+
+    const title = prompt('Enter The title for the seperate Order please');
+    const employeeName = prompt('Enter your employee names seperated by comma').split(',');
+
+
+    const components = {
+        startTime: startTime,
+        endTime: null,
+        employees: employeeName,
+        comment: null,
+    }
+
+    const data = {
+        title: title,
+            components: [components],
+
+    };
+
+   // Send the data to log it in the database
+   const response = await fetch('/seperateOrder/start', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (response.ok) {
+        const result = await response.json();
+        orderId = result.order._id;  // Store the order ID for future updates
+        console.log('Order logged:', result);
+        // Toggle the buttons
+        document.getElementById('startSeperate').hidden = true;
+        document.getElementById('endSeperate').hidden = false;
+    } else {
+        alert('Error logging the order.');
+    }
+
+
+});
+
+document.getElementById('endSeperate').addEventListener('click', async function () {
+    const comment = prompt('Enter a comment');
+    const endTime = new Date();  // Set the end time
+
+    // Prepare the data to update the order
+    const updatedData = {
+        components: {
+            endTime: endTime,
+            comment: comment,
+        },
+    };
+
+    // Send the data to update the order in the database
+    const response = await fetch(`/seperateOrder/end/${orderId}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedData),
+    });
+
+    if (response.ok) {
+        alert('Order updated successfully!');
+        // Reset the form and UI
+        document.getElementById('startSeperate').hidden = false;
+        document.getElementById('endSeperate').hidden = true;
+    } else {
+        alert('Error updating the order.');
+    }
+});
+
+
 window.onload = loadTasks;

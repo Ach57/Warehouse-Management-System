@@ -9,6 +9,8 @@ const cookieParser = require('cookie-parser'); // cookie parser
 const User = require('./public/js/user');
 const Task = require('./public/js/taskSchema')
 const CompletedTask = require('./public/js/completedTask')
+const SeperateOrder = require('./public/js/seperate');
+
 
 const { default: mongoose } = require('mongoose');
 const {updateUserRole} = require('./public/js/updateRole');
@@ -484,13 +486,52 @@ app.get('/attendance', async (req, res) => {
     }
 });
 
-app.post('/seperateOrder', (req, res)=>{
-    const {title} = req.body;
+app.post('/seperateOrder/start', async(req, res)=>{
+    try {
+        const {title, components} = req.body;
+        if (!title || !components || components.length === 0) {
+            return res.status(400).json({ error: 'Invalid data received' });
+        }
+        const newOrder = new SeperateOrder({ title, components });
 
-    
+        await newOrder.save();
+        res.status(201).json({ message: 'Order started and logged', order: newOrder });
 
+    } catch(err){
 
+        console.error('Error logging order:', err);
+        res.status(500).json({ error: 'Internal server error' });
+
+    }
 });
+
+app.patch('/seperateOrder/end/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { components } = req.body;
+
+        if (!components || !components.endTime || !components.comment) {
+            return res.status(400).json({ error: 'Invalid data received' });
+        }
+
+        // Find the order by ID and update the components
+        const updatedOrder = await SeperateOrder.findByIdAndUpdate(
+            id,
+            { $set: { 'components.$[elem].endTime': components.endTime, 'components.$[elem].comment': components.comment } },
+            { new: true, arrayFilters: [{ 'elem.startTime': { $ne: null } }] }
+        );
+
+        if (!updatedOrder) {
+            return res.status(404).json({ error: 'Order not found' });
+        }
+
+        res.status(200).json({ message: 'Order updated successfully', order: updatedOrder });
+    } catch (err) {
+        console.error('Error updating order:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 
 
 app.post('maintenance', (req, res)=>{
