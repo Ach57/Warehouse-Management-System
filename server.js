@@ -719,10 +719,12 @@ app.post('/api/tasks/finalize', async (req, res) => {
     }
 });
 
+/*
 const PORT = process.env.PORT||3000;
 const baseUrl = process.env.BASE_URL ||'http://localhost:';
 server.listen(PORT, ()=>{
     console.log(`Server running at ${baseUrl}${PORT}`);
-})
+})*/
+
 
 
