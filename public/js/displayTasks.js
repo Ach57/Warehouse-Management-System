@@ -3,36 +3,36 @@ document.addEventListener("DOMContentLoaded", () => {
         .then(response => response.json())
         .then(tasks => {
             const tasksContainer = document.getElementById('tasks-container');
-            
+
             if (tasks.length > 0) {
                 tasks.forEach(task => {
-                    
                     let taskHTML = `
                         <div class="container">
                             <div class="task-card">
                                 <h3>${task.title}</h3>
                                 <ul id="task-${task._id}">
                                     ${Object.entries(task.components).map(([component, details]) => {
-                                        const progress = calculateProgress(details);
+                                        const activeWorkers = details.employees.filter(emp => emp.startTime !== null && emp.endTime === null);
+                                        let numOfActiveWorkers = activeWorkers.length
+                                        
+                                        const progress = calculateProgress(details, activeWorkers.length);
 
                                         // Calculate ETA if completed
                                         let etaText = '';
                                         let progressBarColor = '';
 
-                                        if (details.status === 'completed' && details.startTime && details.endTime) {
-                                            const startTime = new Date(details.startTime);
-                                            const endTime = new Date(details.endTime);
-                                            const timeDiff = endTime - startTime; // Difference in milliseconds
+                                        if (details.status === 'completed' && details.startTime && details.endTime) {// if task is done
+                                            const timeDiff = (new Date(details.endTime) - new Date(details.startTime))/60000 // convert difference time to minute
 
                                             // Convert time difference to hours and minutes
-                                            const expectedTime = details.time * 60 * 60 * 1000; // Expected time in milliseconds
+                                            const expectedTime = details.fullTime// get full time of work
                                             let eta = 0;
 
                                             if (timeDiff > expectedTime) {
                                                 // Task is late, show the time beyond expected completion
-                                                const excessTime = timeDiff - expectedTime;
-                                                const excessHours = Math.floor(excessTime / (1000 * 60 * 60));
-                                                const excessMinutes = Math.floor((excessTime % (1000 * 60 * 60)) / (1000 * 60));
+                                                const excessTime = timeDiff - expectedTime // in minutes 
+                                                const excessHours = Math.floor(excessTime / 60); // convert the time in hours
+                                                const excessMinutes = Math.floor(excessTime % 60); // Get the minutes
                                                 eta = `${excessHours}h ${excessMinutes}m beyond`;
                                                 progressBarColor = '#f44336'; // Red for overdue
                                             } else {
@@ -43,19 +43,26 @@ document.addEventListener("DOMContentLoaded", () => {
 
                                             etaText = `Completed - ETA: ${eta}`;
                                         }
-
+                                        
                                         return `
                                             <li id="task-${task._id}-${component}">
                                                 <strong>${component}:</strong> 
                                                 Status: ${details.status} 
                                                 ${details.startTime ? `| Start Time: ${new Date(details.startTime).toLocaleString()}` : ''}
                                                 ${details.endTime ? `| End Time: ${new Date(details.endTime).toLocaleString()}` : ''}
+                                                ${details.startTime && details.endTime ? `| Total Time: ${Math.floor((new Date(details.endTime) - new Date(details.startTime)) / 60000)} minutes` : ''}
+                                                ${details.fullTime && activeWorkers.length > 0 ? 
+                                                    `| Full Task Time: ${(details.fullTime / activeWorkers.length)} minutes` 
+                                                    : details.fullTime ? 
+                                                        `| Full Task Time: ${details.fullTime} minutes` 
+                                                    : ''}
                                                 <div class="progress-container-bar">
                                                     <div class="progress-task-bar" style="width: ${Math.min(progress, 100)}%; background-color: ${progressBarColor};">
-                                                        <span class="eta-text">${etaText}</span> <!-- ETA text inside the progress bar -->
+                                                        <span class="eta-text">${etaText}</span>
                                                     </div>
                                                 </div>
                                                 <p>Progress: <span id="progress-${task._id}-${component}">${progress.toFixed(2)}%</span></p>
+                                                <p>Active Workers: ${activeWorkers.map(worker => worker.name).join(', ') || 'None'}</p>
                                             </li>
                                         `;
                                     }).join('')}
@@ -79,26 +86,26 @@ document.addEventListener("DOMContentLoaded", () => {
                         .then(response => response.json())
                         .then(data => {
                             alert('Task finalized!');
-                            // Optionally, remove the task from the list
                             finalizeButton.closest('.container').remove();
                         })
                         .catch(error => {
                             console.error('Error finalizing task:', error);
                             alert('Error finalizing task');
                         });
-                    })
+                    });
+
                     // Update the progress dynamically
                     setInterval(() => {
                         Object.entries(task.components).forEach(([component, details]) => {
                             const progressBar = document.querySelector(`#task-${task._id}-${component} .progress-task-bar`);
                             const progressText = document.querySelector(`#progress-${task._id}-${component}`);
                             const etaText = document.querySelector(`#task-${task._id}-${component} .eta-text`);
+                            const activeWorkers = details.employees.filter(emp => emp.startTime !== null && emp.endTime === null);
 
                             if (details.status === 'running' && details.startTime) {
-                                const progress = calculateProgress(details);
+                                const progress = calculateProgress(details, activeWorkers.length);
 
                                 if (progressBar) {
-                                    // Set progress bar width
                                     progressBar.style.width = `${Math.min(progress, 100)}%`;
 
                                     // Set the progress bar color based on progress
@@ -116,34 +123,26 @@ document.addEventListener("DOMContentLoaded", () => {
                                 }
                             }
 
-                            // Handle completion and ETA display
                             if (details.status === 'completed' && details.startTime && details.endTime && etaText) {
-                                const startTime = new Date(details.startTime);
-                                const endTime = new Date(details.endTime);
-                                const timeDiff = endTime - startTime; // Difference in milliseconds
+                                const timeDiff = (new Date(details.endTime) - new Date(details.startTime))/60000; // convert to minutes
 
-                                // Calculate the time difference in hours and minutes
-                                const expectedTime = details.time * 60 * 60 * 1000; // Expected time in milliseconds
+                                const expectedTime = details.fullTime  // get full time in minutes
                                 let eta = '0h 0m';
 
                                 if (timeDiff > expectedTime) {
-                                    // Task is late, show the time beyond expected completion
-                                    const excessTime = timeDiff - expectedTime;
-                                    const excessHours = Math.floor(excessTime / (1000 * 60 * 60));
-                                    const excessMinutes = Math.floor((excessTime % (1000 * 60 * 60)) / (1000 * 60));
+                                    const excessTime = timeDiff - expectedTime // in minutes 
+                                    const excessHours = Math.floor(excessTime / 60); // convert the time in hours
+                                    const excessMinutes = Math.floor(excessTime % 60); // Get the minutes
                                     eta = `${excessHours}h ${excessMinutes}m beyond`;
                                 }
 
                                 etaText.textContent = `Completed - ETA: ${eta}`;
-
-                                // Set progress bar color to red if there's an ETA (task is overdue)
                                 if (eta !== '0h 0m') {
-                                    progressBar.style.backgroundColor = '#f44336'; // Red for overdue
+                                    progressBar.style.backgroundColor = '#f44336';
                                 }
                             }
                         });
-                    }, 1000); // Update every 1 second
-                    
+                    }, 1000); // Update every second
                 });
             } else {
                 tasksContainer.innerHTML = "<p>No projects available at the moment.</p>";
@@ -152,16 +151,18 @@ document.addEventListener("DOMContentLoaded", () => {
         .catch(error => console.error('Error fetching tasks:', error));
 });
 
-// Function to calculate progress based on status and times
-function calculateProgress(details) {
+// Function to calculate progress
+function calculateProgress(details, activeWorkerCount) {
     let progress = 0;
     if (details.status === 'completed') {
         progress = 100;
     } else if (details.status === 'running' && details.startTime) {
         const startTime = new Date(details.startTime);
         const currentTime = new Date();
-        const elapsedTime = (currentTime - startTime) / (1000 * 60 * 60); // in hours
-        progress = (elapsedTime / details.time) * 100; // calculate progress based on time
+        const elapsedTime = (currentTime - startTime) / 60000; // in minutes 
+        if (activeWorkerCount > 0) {
+            progress = (elapsedTime / (details.fullTime/activeWorkerCount)) * 100; // calculate progress based on time
+        }
     }
     return progress;
 }
