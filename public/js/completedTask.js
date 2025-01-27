@@ -9,37 +9,87 @@ const completedTaskSchema = new mongoose.Schema({
     metalFabrication: {
       startTime: { type: Date, default: null },
       endTime: { type: Date, default: null },
-      time: { type: Number, required: true }, // in hours
-      status: { type: String, default: "completed" }, // completed
-      employees: [{ type: String }], // List of employees assigned to this component
-      comment: { type: String, default: null },  // Optional comment
+      time: { type: Number, required: true }, //  Total time 
+      fullTime: {type: Number, default: 0}, // Total time of the task
+      totalTime: {type: String, default: null}, // difference between end time and start time
+      status: { type: String, default: "pending" }, // pending, running, completed
+      employees: {
+        type: [
+          {
+            name: { type: String },
+            startTime: { type: Date },
+            endTime: { type: Date, default: null },
+            contribution: { type: String, default: null },
+            comment: { type: String, default: null },
+          }
+        ],
+        default: [], // Ensures this field is always an array
+      },
     },
     paint: {
       time: { type: Number, required: true },
-      status: { type: String, default: "completed" },
-      employees: [{ type: String }], // List of employees assigned to this component
-      comment: { type: String, default: null },  // Optional comment
+      fullTime: {type: Number, default: 0}, // Total time of the task
+      status: { type: String, default: "pending" },
+      employees: {
+        type: [
+          {
+            name: { type: String },
+            startTime: { type: Date },
+            endTime: { type: Date, default: null },
+            contribution: { type: String, default: null },
+            comment: { type: String, default: null },
+          }
+        ],
+        default: [], // Ensures this field is always an array
+      },
+
     },
     assembly: {
       startTime: { type: Date, default: null },
       endTime: { type: Date, default: null },
       time: { type: Number, required: true }, // in hours
-      status: { type: String, default: "completed" },
-      employees: [{ type: String }], // List of employees assigned to this component
-      comment: { type: String, default: null },  // Optional comment
+      fullTime: {type: Number, default: 0}, // Total time of the task
+      totalTime: {type: String, default: null}, // difference between end time and start time
+      status: { type: String, default: "pending" },
+      employees: {
+        type: [
+          {
+            name: { type: String },
+            startTime: { type: Date },
+            endTime: { type: Date, default: null },
+            contribution: { type: String, default: null },
+            comment: { type: String, default: null },
+          }
+        ],
+        default: [], // Ensures this field is always an array
+      },
+
     },
     shipping: {
       startTime: { type: Date, default: null },
       endTime: { type: Date, default: null },
       time: { type: Number, required: true }, // in hours
-      status: { type: String, default: "completed" },
-      employees: [{ type: String }], // List of employees assigned to this component
-      comment: { type: String, default: null },  // Optional comment
+      fullTime: {type: Number, default: 0}, // Total time of the task
+      totalTime: {type: String, default: null}, // difference between end time and start time
+      status: { type: String, default: "pending" },
+      employees: {
+        type: [
+          {
+            name: { type: String },
+            startTime: { type: Date },
+            endTime: { type: Date, default: null },
+            contribution: { type: String, default: null },
+            comment: { type: String, default: null },
+          }
+        ],
+        default: [], // Ensures this field is always an array
+      },
+
     },
   },
   createdAt: {
     type: Date,
-    default: Date.now,
+    default : Date.now,
   },
   completedAt: {
     type: Date,
@@ -48,3 +98,4 @@ const completedTaskSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('CompletedTask', completedTaskSchema);
+
