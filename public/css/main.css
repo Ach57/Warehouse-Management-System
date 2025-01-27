@@ -182,11 +182,10 @@ form h1{
 }
 
 .timer-bar {
-    width: 100%;   /* Ensure it takes up the full width of the parent container */
-    background-color: #f3f3f3;  /* Light background for the container */
-    height: 100px;  /* Height of the progress bar */
+    background-color: #f3f3f3; /* Neutral background for contrast */
+    height: 40px; /* Slimmer bar for a cleaner look */
     position: relative;
-    border-radius: 10px; /* Optional: makes the edges rounded */
+    border-radius: 10px; /* Smooth rounded edges */
     overflow: hidden;
 }
 
@@ -938,6 +937,11 @@ footer p {
     margin: 20px;
     max-height: 500px; /* Prevents overflow if there are too many tasks */
     overflow-y: auto;
+
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 tasks per row */
+    gap: 20px; /* Space between tasks */
+
 }
 
 /* Individual Task Styling */
@@ -948,6 +952,7 @@ footer p {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for each task */
     transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover transition */
+
 }
 
 /* Hover effect on task */
@@ -993,17 +998,22 @@ footer p {
 
 
 .task-component {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 8px;
+    background-color: #ffffff; /* Clean white background */
+    border: 1px solid #d9d9d9; /* Subtle border for structure */
+    border-radius: 12px; /* Slightly more rounded for a modern look */
     padding: 20px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    margin: 20px 0;
-    transition: transform 0.3s ease-in-out;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1); /* Softer and larger shadow for depth */
+    margin: 10px 0; /* Space between components */
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    display: flex; /* Switch to flexbox for better alignment */
+    flex-direction: column; /* Stack items vertically */
+    gap: 15px; /* Space between inner elements */
+
 }
 
 .task-component:hover {
-    transform: translateY(-10px);
+    transform: translateY(-8px); /* Slight lift on hover */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15); /* Enhanced shadow on hover */
 }
 
 .component-status {
@@ -1016,10 +1026,39 @@ footer p {
 
 
 .time-left {
-    font-size: 1rem;
-    color: #666;
-    margin-bottom: 8px;
+    font-size: 0.9rem; /* Slightly smaller for secondary text */
+    color: #333; /* Darker color for better readability */
+    margin-top: 5px; /* Add spacing above the timer */
 }
+
+.employee-list {
+    list-style: none; /* Remove default bullet points */
+    padding: 0;
+    font-weight: bold;
+    margin: 0;
+    font-size: 0.95rem;
+    color: #444; /* Subtle text color */
+}
+.employee-list li {
+    display: flex;
+    justify-content: space-between; /* Align name and status */
+    padding: 5px 0;
+    border-bottom: 1px solid #eee; /* Separator between employees */
+}
+
+.employee-list li:last-child {
+    border-bottom: none; /* Remove border for the last item */
+}
+
+.employee-list li span.status {
+    font-weight: bold;
+    color: #007bff; /* Blue for "Working" */
+}
+
+.employee-list li span.status.finished {
+    color: #28a745; /* Green for "Finished" */
+}
+
 
 .progress-bar-container {
     width: 100%;
@@ -1062,50 +1101,67 @@ footer p {
 
 }
 
+#tasks-container{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px
+}
+
+
+
 /* Task Card Styles */
 .task-card {
-    background-color: #f9f9f9;
-    border-radius: 10px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
+    background: linear-gradient(135deg, #e2e8f0, #f7fafc);
+    border-radius: 12px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    padding: 25px;
     width: 80%;
     margin-bottom: 20px;
     transition: all 0.3s ease;
+    border: 1px solid #e2e8f0;
+
+    
 }
 
 .task-card:hover {
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    transform: translateY(-5px); /* Slight hover lift */
 }
 
-/* Task Title */
 .task-card h3 {
-    font-size: 22px;
-    color: #333;
-    font-weight: bold;
+    font-size: 24px;
+    color: #2d3748;
+    font-weight: 600;
     margin-bottom: 15px;
+    font-family: 'Roboto', sans-serif;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
-
 /* List Style */
 .task-card ul {
     padding-left: 0;
     margin: 0;
+    list-style-type: none;
 }
 
 /* List Item Style */
 .task-card li {
-    margin-bottom: 20px;
-    font-size: 14px;
-    color: #555;
+    margin-bottom: 18px;
+    font-size: 15px;
+    color: #4a5568;
+    position: relative;
 }
 
 /* Component Label */
 .task-card li strong {
     font-size: 16px;
-    color: #333;
+    color: #2d3748;
     display: inline-block;
-    width: 120px;
+    width: 140px;
     margin-right: 10px;
+    font-weight: bold;
+    text-transform: uppercase;
 }
+
 
 /* Progress Container */
 .progress-container-bar {
@@ -1161,6 +1217,12 @@ footer p {
 }
 
 
+#completed-tasks-container{
+    display: grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:10px
+}
+
 .completed-task-card {
     border: 1px solid #ddd;
     padding: 20px;
@@ -1180,6 +1242,12 @@ footer p {
     flex-wrap: wrap;
     justify-content: space-between;
     gap: 20px;
+}
+
+.task-components-review{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
 }
 
 .component-card {
@@ -1202,6 +1270,56 @@ footer p {
     margin: 5px 0;
 }
 
+
+
+.component-card-review .component-title-review{
+
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 15px;
+}
+
+.component-card-review p {
+    font-size: 14px;
+    color: #555;
+    line-height: 1.6;
+    margin-bottom: 12px;
+}
+
+.component-card-review p strong {
+    font-weight: bold;
+    color: #333;
+}
+
+.component-card-review p:last-child {
+    font-style: italic;
+    color: #777;
+}
+
+.component-card-review:hover {
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+}
+
+
+
+.component-card-review{
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: 400px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+}
+
+.component-card-review:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+}
+
 @media (max-width: 768px) {
     .component-card {
         width: 48%; /* On smaller screens, two cards per row */
@@ -1212,6 +1330,124 @@ footer p {
     .component-card {
         width: 100%; /* On very small screens, one card per row */
     }
+    .header-container {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .margining,
+    .instruction-box {
+        margin-right: 0;
+    }
+
+    .admin-dashboard nav ul {
+        grid-auto-flow: row;
+        text-align: center;
+        gap: 10px;
+    }
+
+    .admin-dashboard li {
+        font-size: 16px;
+        padding: 10px;
+    }
+
+    .admin-section-list,
+    .admin-section-list2 {
+        font-size: medium;
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .add-employee-form input,
+    .add-employee-form button {
+        font-size: 14px;
+    }
+
+    .table-description table,
+    .inventory-table table {
+        width: 100%;
+        font-size: smaller;
+    }
+
+    .auth-container {
+        padding: 15px;
+        margin: 0 10px;
+        max-width: 90%;
+    }
+
+    .auth-tab {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .popup-content {
+        width: 90%;
+        margin: 10% auto;
+    }
+
+    .progress-container {
+        margin: 20px 10px;
+    }
+
+    .task-min-box h3 {
+        font-size: 18px;
+    }
+
+    button {
+        font-size: 14px;
+    }
+
+    footer {
+        font-size: 12px;
+        padding: 8px;
+    }
+
+    .logout-button {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .logout-button h2 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .logout-button button {
+        width: 100%;
+        margin: 5px 0;
+    }
+
+    .dropdown-menu {
+        font-size: 14px;
+        padding: 8px;
+    }
+
+    .request-form {
+        padding: 15px;
+        margin: 10px;
+        width: 100%;
+    }
+
+    .request-form h1 {
+        font-size: 18px;
+    }
+
+    #task-container {
+        display: flex;
+        flex-direction: column; /* Stack items vertically */
+        gap: 10px; /* Add spacing between stacked items */
+        width: 100%; /* Ensure it takes the full width */
+    }
+
+    #tasks-container {
+        grid-template-columns: 1fr;  /* Single column layout */
+        gap: 15px;  /* Adjust gap for smaller screens */
+    }
+
+
+    
+
 }
 
 
