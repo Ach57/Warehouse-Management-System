@@ -17,7 +17,6 @@ a{
 }
 
 
-
 form{
     display: flex;
     flex-direction: column;
@@ -934,7 +933,6 @@ footer p {
     background-color: #e6f7ff; /* Light blue background for the task container */
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Soft shadow around the container */
-    margin: 20px;
     max-height: 500px; /* Prevents overflow if there are too many tasks */
     overflow-y: auto;
 
@@ -1107,6 +1105,13 @@ footer p {
     gap: 20px
 }
 
+.task-grid{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    column-gap: 50px;
+    
+}
 
 
 /* Task Card Styles */
@@ -1435,16 +1440,22 @@ footer p {
 
     #task-container {
         display: flex;
-        flex-direction: column; /* Stack items vertically */
-        gap: 10px; /* Add spacing between stacked items */
-        width: 100%; /* Ensure it takes the full width */
+        flex-direction: column; 
+        gap: 10px; 
+        width: 100%;
+        align-items: stretch;
     }
 
     #tasks-container {
-        grid-template-columns: 1fr;  /* Single column layout */
-        gap: 15px;  /* Adjust gap for smaller screens */
+        grid-template-columns: 1fr;  
+        gap: 15px;  
     }
 
+
+    .container{
+        flex-direction: column;
+        align-items: stretch;
+    }
 
     
 

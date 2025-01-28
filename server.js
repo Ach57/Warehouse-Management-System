@@ -856,3 +856,24 @@ app.listen(3000, '0.0.0.0', () => {
 
 
 
+
+
+  /*
+
+  1. Add  3-5 buttons for each task of the main task that the employee can click start/finish and it would log their names and time as well as divide the total/ number of people and leave the enter comment section and calculate the total time. (DONE)
+
+  2. For the Seperate Order, its always one person ( DONE)
+
+  3. For the maintenance, No timer needed and a prompt and multiple users can work on it. (Done )
+
+  4. Combine the progress of the Contracts1 
+
+  5. fix time in MongoDb (Set to correct time zone) =====> MongoDB uses by default UTC and data will be modifyied upon getting it ( subtract -5)
+
+  6. Fix bug when user finalizes task, button should be gone  =====> (UPDATE : This is fixed)
+
+  7. Fix time handler in admin dashboard (DONE)
+
+  8. In terms of calculation the time gets divded (DONE)
+
+  */

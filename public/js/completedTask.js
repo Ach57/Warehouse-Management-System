@@ -98,4 +98,3 @@ const completedTaskSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model('CompletedTask', completedTaskSchema);
-
