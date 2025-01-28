@@ -21,7 +21,7 @@ const socketIo = require('socket.io')
 const app = express();
 const server = http.createServer(app)
 const io = socketIo(server)
-const uri = process.env.MONGO_URI;
+const uri = process.env.MONGO_URI || 'mongodb://localhost:27017/IndoTechDB';
 
 const confirmedTasks =[]
 
@@ -72,15 +72,24 @@ app.use(async (req, res, next) => {
     next();
 });
 
+app.get('/employee/username', (req, res)=>{
+    const username = req.cookies.username;
+    if(username){
+        res.json({username});
+    }else{
+        res.status(401).json({error: 'User not found'});
+    }
+});
+
 app.post('/assignTask', async (req, res) => {
     try {
         // Capture form data from the request body
         const { 
             taskTitle, 
-            metalFabricationTime, 
-            paintTime, 
-            assemblyTime, 
-            shippingTime, 
+            metalFabricationTime, // time of work
+            paintTime,  // time of work
+            assemblyTime, // time of work
+            shippingTime, // time of work
         } = req.body;
 
         // Create a new task based on the schema
@@ -88,19 +97,23 @@ app.post('/assignTask', async (req, res) => {
             title: taskTitle,
             components: {
                 metalFabrication: {
-                    time: metalFabricationTime ? parseFloat(metalFabricationTime) : 0,
+                    time: metalFabricationTime ? parseFloat(metalFabricationTime) * 60 : 0, // convert to minute
+                    fullTime: metalFabricationTime ? parseFloat(metalFabricationTime) * 60 : 0,
                     status: 'pending',
                 },
                 paint: {
-                    time: paintTime ? parseFloat(paintTime) : 0,
+                    time: paintTime ? parseFloat(paintTime) * 60 : 0, // convert to min
+                    fullTime: metalFabricationTime ? parseFloat(paintTime) * 60 : 0,
                     status: 'pending',
                 },
                 assembly: {
-                    time: assemblyTime ? parseFloat(assemblyTime) : 0,
+                    time: assemblyTime ? parseFloat(assemblyTime) * 60 : 0, // convert to min
+                    fullTime: metalFabricationTime ? parseFloat(assemblyTime) * 60 : 0,
                     status: 'pending',
                 },
                 shipping: {
-                    time: shippingTime ? parseFloat(shippingTime) : 0,
+                    time: shippingTime ? parseFloat(shippingTime) * 60 : 0, // convert to min
+                    fullTime: metalFabricationTime ? parseFloat(shippingTime) * 60 : 0,
                     status: 'pending',
                 },
             },
@@ -492,7 +505,18 @@ app.post('/seperateOrder/start', async(req, res)=>{
         if (!title || !components || components.length === 0) {
             return res.status(400).json({ error: 'Invalid data received' });
         }
-        const newOrder = new SeperateOrder({ title, components });
+
+        const newOrder = new SeperateOrder({
+            title,
+            components: {
+                startTime: components.startTime,
+                endTime: components.endTime,
+                timeTaken: components.timeTaken,
+                employees: components.employees, 
+                comment: components.comment,
+            },
+        });
+
 
         await newOrder.save();
         res.status(201).json({ message: 'Order started and logged', order: newOrder });
@@ -525,64 +549,136 @@ app.post('/maintenance/start', async (req, res)=>{
 
 });
 
+app.get('/maintenance/get', async(req, res)=>{
+    try{
+
+        const order = await Maintenance.findOne({
+            "components.startTime": { $ne: null },  // startTime is not null
+            "components.endTime": null,  // endTime is null
+        })
+
+        if (!order) {
+            return res.status(404).json({ message: "No active separate order found for this employee." });
+        }
+
+        res.json({order:order});
+    
+
+    }catch(err){
+        console.log(err)
+        res.status(500).json({error: 'Internal server error'})
+
+    }
+
+});
+
+
+app.post('/maintenance/add', async (req, res) =>{
+    try{
+        const employeeData = req.body;
+        const order = await Maintenance.findOne({
+            "components.startTime": { $ne: null },  // startTime is not null
+            "components.endTime": null  // endTime is null
+        })
+
+        if (!order){
+            return res.status(404).json({ message: "No active separate order found for this employee." });  
+        }
+
+        order.components.employees.push(employeeData);
+        await order.save();
+        res.status(200).json({ message: 'Employee added successfully' });
+
+    }catch(err){
+        console.log(err);
+        res.status(500).json({error: 'Internal server error'})
+    }
+
+});
+
+app.get('/seperateOrder/get', async (req, res)=>{
+    try{
+        const employeeName = req.query.employeeName;
+        if (!employeeName) {
+            return res.status(400).json({ message: "Employee name is required." });
+        }
+        const order = await SeperateOrder.findOne({
+            "components.employees": employeeName,
+            "components.startTime": { $ne: null },  // startTime is not null
+            "components.endTime": null  // endTime is null
+        });
+        if (!order) {
+            return res.status(404).json({ message: "No active separate order found for this employee." });
+        }
+        res.json({ orderId: order._id });
+        
+
+    }catch(err){
+        console.error(err);
+        res.status(500).json({ message: "Server error" });
+
+
+    }
+
+
+});
+
 
 app.patch('/seperateOrder/end/:id', async (req, res) => {
     try {
         const { id } = req.params;
         const { components } = req.body;
+        const order = await SeperateOrder.findById(id);
+        const timeDiff = new Date(components.endTime) - new Date(order.components.startTime)
+        const hours = Math.floor(timeDiff / 1000 / 60 / 60);
+        const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+        order.components.endTime = components.endTime
+        order.components.comment = components.comment
+        order.components.timeTaken = `${hours} hours ${minutes} minutes`;
 
-        if (!components || !components.endTime || !components.comment) {
-            return res.status(400).json({ error: 'Invalid data received' });
-        }
+        await order.save();
+        res.status(200).json({ message: 'Order updated successfully'});
 
-        // Find the order by ID and update the components
-        const updatedOrder = await SeperateOrder.findByIdAndUpdate(
-            id,
-            { $set: { 'components.$[elem].endTime': components.endTime, 'components.$[elem].comment': components.comment } },
-            { new: true, arrayFilters: [{ 'elem.startTime': { $ne: null } }] }
-        );
 
-        if (!updatedOrder) {
-            return res.status(404).json({ error: 'Order not found' });
-        }
-
-        res.status(200).json({ message: 'Order updated successfully', order: updatedOrder });
+        
     } catch (err) {
         console.error('Error updating order:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-app.patch('/maintenance/end/:id', async (req, res)=>{
+app.post('/maintenance/end/:id', async (req, res) => {
+    try {
+        const { _id, name, endTime, contribution, comment } = req.body;
 
-    try{
-        const {id} = req.params;
-        const {components} = req.body;
-
-        if (!components || !components.endTime || !components.comment){
-            return res.status(400).json({ error: 'Invalid data received' });
+        const order = await Maintenance.findById(_id);
+        if (!order) {
+            return res.status(404).json({ message: "No active maintenance order found." });
         }
 
-        const updatedOrder = await Maintenance.findByIdAndUpdate(
-            id,
-            { $set: { 'components.$[elem].endTime': components.endTime, 'components.$[elem].comment': components.comment } },
-            { new: true, arrayFilters: [{ 'elem.startTime': { $ne: null } }] }
-        );
-
-
-        if(!updatedOrder){
-            return res.status(404).json({ error: 'Order not found' });
+        // Find the employee and update their data
+        const employee = order.components.employees.find(emp => emp.name === name);
+        if (employee) {
+            employee.endTime = endTime;
+            employee.contribution = contribution;
+            employee.comment = comment;
         }
-        res.status(200).json({ message: 'Order updated successfully', order: updatedOrder });
-    }catch(err){
+
+        const allEmployeeComplete = order.components.employees.every(emp => emp.endTime);
+
+        if (allEmployeeComplete){
+
+            order.components.endTime = endTime;
+
+        }
+        await order.save();
+
+        res.status(200).json({ message: "Maintenance task updated successfully" });
+    } catch (err) {
         console.error('Error updating order:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
-
-})
-
-
-
+});
 
 
 
@@ -612,85 +708,120 @@ app.get('/employee/tasks', async (req, res) => {
     }
 });
 
-// Start the task component
+// Backend route for starting the task
 app.post('/employee/tasks/:taskId/:component/start', async (req, res) => {
     const { taskId, component } = req.params;
-
-    try {
-        const task = await Task.findById(taskId);
-        if (!task || !task.components[component]) {
-            return res.status(404).json({ message: 'Task or component not found.' });
-        }
-
-        const componentData = task.components[component];
-        if (componentData.status !== 'pending') {
-            return res.status(400).json({ message: 'Task component is already started or completed.' });
-        }
-
-        componentData.status = 'running';
-
-        // Only set startTime if the component supports timers
-        if (componentData.startTime !== undefined) {
-            componentData.startTime = new Date(); // Log start time
-        }
-
-        await task.save();
-
-        res.json({ task });
-    } catch (error) {
-        console.error('Error starting task component:', error);
-        res.status(500).json({ message: 'Failed to start task component.' });
-    }
-});
-
-
-// Finish the task component
-app.post('/employee/tasks/:taskId/:component/finish', async (req, res) => {
-    const { taskId, component } = req.params;
-    const { timeSpent, comment, employees } = req.body;
+    const { employeeName, startTime } = req.body; // Extract employee info and start time from the request
 
     try {
         // Find the task by ID
         const task = await Task.findById(taskId);
-
-        // Check if the task and the specific component exist
-        if (!task || !task.components[component]) {
-            return res.status(404).json({ message: 'Task or component not found.' });
+        if (!task) {
+            return res.status(404).json({ message: 'Task not found' });
         }
 
-        const componentData = task.components[component];
-
-        // Check if the component is already completed
-        if (componentData.status === 'completed') {
-            return res.status(400).json({ message: 'Task component is already completed.' });
+        // Find the specified component
+        const comp = task.components[component];
+        if (!comp) {
+            return res.status(404).json({ message: 'Component not found' });
         }
 
-        // Update component status
-        componentData.status = 'completed';
+        // Check if the employee is already in the list
+        const employeeExists = comp.employees.some(emp => emp.name === employeeName);
+        if (!employeeExists) {
+            comp.employees.push({
+                name: employeeName,
+                startTime: new Date(startTime),
+                contribution: 0,
+                comment: null, // Can be updated later
+            });
+        }
 
-        // Log the time spent
-        componentData.timeSpent = timeSpent || null;
+        // Update the status of the component to 'running'
+        if (comp.status !="running"){
+            comp.status = 'running';
+        }
+        if(comp.startTime=== null){
+            comp.startTime = new Date();
+        }
+        
+        const timeOfWork = Math.round((new Date() - comp.startTime)/60000); // time of execution in min
 
-        // Add comment, if provided
-        componentData.comment = comment || '';
+        const activeWorkers = comp.employees.filter(emp => emp.startTime!==null & emp.endTime===null);
 
-        // Add employees involved, if provided
-        componentData.employees = Array.isArray(employees) ? employees : [];
+        if (timeOfWork > comp.fullTime ){
+            comp.time = 0; // set this to 0 incase the time passed more than it should
+        }else{
 
-        // Only set endTime if the component supports timers
-        if (componentData.endTime !== undefined) {
-            componentData.endTime = new Date(); // Log end time
+            const remainingTime = Math.round((comp.fullTime - timeOfWork)/activeWorkers.length);// get the new time and divde it by the current number of active works
+            comp.time = remainingTime;
         }
 
         // Save the updated task
         await task.save();
 
-        // Return the updated task
-        res.status(200).json({ message: 'Task component finished successfully', task });
+        // Return the updated task in the response
+        res.json({ task });
     } catch (error) {
-        console.error('Error finishing task component:', error);
-        res.status(500).json({ message: 'Failed to finish task component.' });
+        console.error('Error starting task:', error);
+        res.status(500).json({ message: 'Server error' });
     }
+});
+
+
+
+// Finish the task component
+app.post('/employee/tasks/:taskId/:component/finish', async (req, res) => {
+    const { taskId, component } = req.params; // taskId and component (e.g., 'metalFabrication')
+    const { userName, timeSpent, comment } = req.body; // Data from the frontend
+
+    try{
+        const task = await Task.findById(taskId);
+
+        const taskComponent = task.components[component];
+
+        const employee = taskComponent.employees.find(emp => emp.name === userName);
+        if(employee){
+            employee.endTime = new Date(timeSpent);
+            const contributionInMinutes = Math.round((employee.endTime - employee.startTime) / 60000); // Rounded to the nearest minute
+            employee.contribution =  `${contributionInMinutes} minute${contributionInMinutes !== 1 ? 's' : ''}`;
+            employee.comment = comment || "";   
+            const allFinished = taskComponent.employees.every(emp => emp.endTime !== null);
+            if (allFinished){ // all finished 
+                taskComponent.status = 'completed';
+                taskComponent.endTime = new Date();
+                const timeSpentTotally = Math.round((taskComponent.endTime - taskComponent.startTime)/ 60000); // in minutes
+                taskComponent.totalTime = `${timeSpentTotally} minute${timeSpentTotally !== 1 ? 's' : ''} - Completed`;
+                taskComponent.time = timeSpentTotally;
+            }else{ // in case the last one didn't click on finish 
+                const activeWorkers = taskComponent.employees.filter(emp => emp.startTime!==null & emp.endTime ===null); // get list of all active employees
+                const timeOfWork = Math.round((new Date() - taskComponent.startTime)/60000) // GET TIME IN MINUTE of what is done
+
+                if (timeOfWork>taskComponent.time){
+                    taskComponent.time = 0 // means they team did more than they should
+                }else{
+                    const remainingTime = Math.round((taskComponent.fullTime - timeOfWork)/activeWorkers.length)
+                    taskComponent.time = remainingTime;
+                }
+
+
+            }
+        
+            await task.save(); // Save the updated task
+            res.json({ task });
+
+
+        }else{
+            res.status(404).json({ message: 'Employee not found in task component' });
+
+        }
+
+
+    } catch(error){
+        
+        res.status(500).json({message: 'Error finishing task', error});
+    }
+
 });
 
 
@@ -719,17 +850,9 @@ app.post('/api/tasks/finalize', async (req, res) => {
     }
 });
 
-/*
-const PORT = process.env.PORT||3000;
-const baseUrl = process.env.BASE_URL ||'http://localhost:';
-server.listen(PORT, ()=>{
-    console.log(`Server running at ${baseUrl}${PORT}`);
-})*/
-
 app.listen(3000, '0.0.0.0', () => {
     console.log('Server is running on http://0.0.0.0:3000');
   });
-
 
 
 
