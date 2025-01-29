@@ -752,7 +752,6 @@ app.post('/employee/tasks/:taskId/:component/start', async (req, res) => {
         if (timeOfWork > comp.fullTime ){
             comp.time = 0; // set this to 0 incase the time passed more than it should
         }else{
-
             const remainingTime = Math.round((comp.fullTime - timeOfWork)/activeWorkers.length);// get the new time and divde it by the current number of active works
             comp.time = remainingTime;
         }

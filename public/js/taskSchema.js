@@ -27,8 +27,11 @@ const taskSchema = new mongoose.Schema({
       },
     },
     paint: {
+      startTime: { type: Date, default: null },
+      endTime: { type: Date, default: null },
       time: { type: Number, required: true },
       fullTime: {type: Number, default: 0}, // Total time of the task
+      totalTime: {type: String, default: null},
       status: { type: String, default: "pending" },
       employees: {
         type: [
