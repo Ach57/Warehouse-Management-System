@@ -703,6 +703,8 @@ app.get('/logout', async (req,res)=>{
 app.get('/employee/tasks', async (req, res) => {
     try {
         const tasks = await Task.find(); // Fetch tasks from DB
+        const priorityOrder = {high: 1, medium: 2, low: 3};
+        tasks.sort((a, b) => priorityOrder[a.priorityTask] - priorityOrder[b.priorityTask]);
         res.json(tasks); // Return tasks as JSON
     } catch (error) {
         console.error('Error fetching tasks:', error);
