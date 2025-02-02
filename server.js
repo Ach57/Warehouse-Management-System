@@ -227,6 +227,8 @@ app.get('/admin', (req, res)=>{
 app.get('/api/tasks', async (req, res) => {
     try {
         const tasks = await Task.find();  // Fetch all tasks from the database
+        const priorityOrder = { high: 1, medium: 2, low: 3 };
+        tasks.sort((a, b) => priorityOrder[a.priorityTask] - priorityOrder[b.priorityTask]);
         res.json(tasks);  // Return the tasks as a JSON response
     } catch (err) {
         console.error(err);
