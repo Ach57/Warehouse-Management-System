@@ -950,7 +950,13 @@ footer p {
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Soft shadow for each task */
     transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover transition */
+    
 
+}
+
+.task-components-container{
+    display: grid;
+    grid-template-columns: repeat(2,1fr);
 }
 
 /* Hover effect on task */

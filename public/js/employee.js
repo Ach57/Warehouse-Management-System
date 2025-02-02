@@ -15,8 +15,9 @@ async function loadTasks() {
         tasks.forEach((task) => {
             let taskHtml = `
                 <div class="task">
-                    <h3>${task.title}</h3>
+                    <h3>${task.title} - ${task.priorityTask}</h3>
             `;
+            let componentsHtml = ''
 
             Object.keys(task.components).forEach((component) => {
                 const comp = task.components[component];
@@ -52,7 +53,7 @@ async function loadTasks() {
                 });
                 employeesHtml += '</ul>';
 
-                taskHtml += `
+                componentsHtml += `
                     <div class="task-component">
                         <p class="component-status">${component} - ${statusText}</p>
                         <div class="timer-bar">
@@ -66,7 +67,11 @@ async function loadTasks() {
 
             });
 
-            taskHtml += `</div>`; // Close task div
+            taskHtml += `
+        <div class="task-components-container">
+            ${componentsHtml}
+        </div>
+    `; // Close task div
             taskContainer.innerHTML += taskHtml; // Append task to the container
         });
     } catch (error) {

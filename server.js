@@ -90,11 +90,13 @@ app.post('/assignTask', async (req, res) => {
             paintTime,  // time of work
             assemblyTime, // time of work
             shippingTime, // time of work
+            priorityTask: priorityTask
         } = req.body;
 
         // Create a new task based on the schema
         const newTask = new Task({
             title: taskTitle,
+            priorityTask: priorityTask,
             components: {
                 metalFabrication: {
                     time: metalFabricationTime ? parseFloat(metalFabricationTime) * 60 : 0, // convert to minute
@@ -879,4 +881,10 @@ app.listen(3000, '0.0.0.0', () => {
 
   8. In terms of calculation the time gets divded (DONE)
 
+  9. Fix page with 4 grids in admin dash and add it to employee dash
+
+  10. Prepare documentation
+
+  11. Add High, low, medium priority and load based on that
+  
   */

@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     let taskHTML = `
                     <div class="container-display - ${task._id}">
                         <div class="task-card-display">
-                            <h3>${task.title}</h3>
+                            <h3>${task.title} - ${task.priorityTask}</h3>
                             <table class="progress-table">
                                 <thead>
                                     <tr>
