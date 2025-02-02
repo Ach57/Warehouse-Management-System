@@ -5,6 +5,7 @@ const taskSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  priorityTask: { type: String, default: 'low'},
   components: {
     metalFabrication: {
       startTime: { type: Date, default: null },
